@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <title>Вакансиялар порталы</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f4f7f6; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { color: #2c3e50; text-align: center; }
+        .filter-box { text-align: center; margin-bottom: 25px; }
+        .filter-btn { background: #fff; border: 1px solid #ccc; padding: 8px 16px; margin: 4px; cursor: pointer; border-radius: 20px; transition: 0.3s; }
+        .filter-btn:hover, .filter-btn.active { background: #3498db; color: #fff; border-color: #3498db; }
+        .vacancy-card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .vacancy-card h3 { margin-top: 0; color: #2980b9; }
+        .city-tag { background: #e0f7fa; color: #00796b; padding: 3px 8px; font-size: 12px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 Вакансиялар порталы</h1>
+        
+        <!-- Қала таңдау панелі -->
+        <div class="filter-box" id="city-filters">
+            <button class="filter-btn active" onclick="filterVacancies('Барлығы')">Барлық қалалар</button>
+            <button class="filter-btn" onclick="filterVacancies('Алматы')">Алматы</button>
+            <button class="filter-btn" onclick="filterVacancies('Астана')">Астана</button>
+            <button class="filter-btn" onclick="filterVacancies('Шымкент')">Шымкент</button>
+            <button class="filter-btn" onclick="filterVacancies('Қарағанды')">Қарағанды</button>
+            <button class="filter-btn" onclick="filterVacancies('Атырау')">Атырау</button>
+            <button class="filter-btn" onclick="filterVacancies('Тараз')">Тараз</button>
+        </div>
+
+        <div id="vacancies-list">Вакансиялар жүктелуде...</div>
+    </div>
+
+    <script>
+        function loadVacancies(city = 'Барлығы') {
+            let url = '/api/vacancies';
+            if (city !== 'Барлығы') {
+                url += `?city=${encodeURIComponent(city)}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const listDiv = document.getElementById('vacancies-list');
+                    listDiv.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        listDiv.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Бұл қалада әзірге вакансиялар жоқ.</p>';
+                        return;
+                    }
+
+                    data.forEach(vacancy => {
+                        listDiv.innerHTML += `
+                            <div class="vacancy-card">
+                                <span class="city-tag">📍 ${vacancy.city}</span>
+                                <h3>${vacancy.title} (${vacancy.company})</h3>
+                                <p><b>Жалақы:</b> ${vacancy.salary}</p>
+                                <p>${vacancy.description}</p>
+                            </div>
+                        `;
+                    });
+                });
+        }
+
+        function filterVacancies(city) {
+            // Батырмалардың белсенді күйін ауыстыру
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            loadVacancies(city);
+        }
+
+        // Бет алғаш ашылғанда барлық вакансияларды жүктеу
+        loadVacancies();
+    </script>
+</body>
+</html>
